@@ -33,12 +33,11 @@ if File.exist? 'event_attendees.csv'
     zipcode = clean_zipcode(row[:zipcode])
     begin
       legislators_names = get_legislators_names(zipcode)
+      personal_letter = template.gsub('FIRST_NAME', name)
+      personal_letter.gsub!('LEGISLATORS', legislators_names)
     rescue StandardError
-      puts 'try typing zip code next time.'
+      puts "Error rescued :#{name}"
     end
-    personal_letter = template.gsub('FIRST_NAME', name)
-    personal_letter.gsub!('LEGISLATORS', legislators_names)
-
     puts personal_letter
   end
 else
