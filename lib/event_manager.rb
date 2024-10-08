@@ -6,6 +6,17 @@ require 'erb'
 
 puts 'Event Manager initialized!'
 
+def clean_phone_no(number)
+  num = number.scan(/[0-9]/).join
+  if num.length == 10
+    num
+  elsif num.length == 11
+    num[1..] if num[0] == '1'
+  else
+    'Bad number'
+  end
+end
+
 def clean_zipcode(zipcode)
   zipcode.to_s.rjust(5, '0')[0..4]
 end
@@ -41,6 +52,7 @@ if File.exist? 'event_attendees.csv'
     id = row[0]
     name = row[:first_name]
     begin
+      number = clean_phone_no(row[:homephone])
       zipcode = clean_zipcode(row[:zipcode])
       legislators = get_legislators_names(zipcode)
       erb_template = ERB.new template
