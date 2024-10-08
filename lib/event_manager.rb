@@ -2,6 +2,7 @@
 
 require 'csv'
 require 'google-apis-civicinfo_v2'
+require 'erb'
 
 puts 'Event Manager initialized!'
 
@@ -13,15 +14,23 @@ def get_legislators_names(zipcode)
   civicinfo = Google::Apis::CivicinfoV2::CivicInfoService.new
   civicinfo.key = File.read('key.key').strip
 
-  legislators = civicinfo.representative_info_by_address(
+  civicinfo.representative_info_by_address(
     address: zipcode,
     levels: 'country',
     roles: %w[legislatorUpperBody legislatorLowerBody]
   ).officials
-  legislators.map(&:name).join(', ')
 end
-if File.exist? 'form_letter.html'
-  template = File.read('form_letter.html')
+
+def save_letter(id, form_letter)
+  Dir.mkdir 'output' unless Dir.exist? 'output'
+  file_name = "output/thanks_#{id}.html"
+  File.open(file_name, 'w') do |file|
+    file.puts form_letter
+  end
+end
+
+if File.exist? 'form_letter.erb'
+  template = File.read('form_letter.erb')
 else
   puts 'No such file exists.'
 end
@@ -29,16 +38,17 @@ end
 if File.exist? 'event_attendees.csv'
   contents = CSV.open('event_attendees.csv', headers: true, header_converters: :symbol)
   contents.each do |row|
+    id = row[0]
     name = row[:first_name]
-    zipcode = clean_zipcode(row[:zipcode])
     begin
-      legislators_names = get_legislators_names(zipcode)
-      personal_letter = template.gsub('FIRST_NAME', name)
-      personal_letter.gsub!('LEGISLATORS', legislators_names)
+      zipcode = clean_zipcode(row[:zipcode])
+      legislators = get_legislators_names(zipcode)
+      erb_template = ERB.new template
+      form_letter = erb_template.result(binding)
+      save_letter(id, form_letter)
     rescue StandardError
       puts "Error rescued :#{name}"
     end
-    puts personal_letter
   end
 else
   puts 'No such file exists.'
