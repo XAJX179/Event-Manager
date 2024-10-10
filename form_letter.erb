@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en-US">
 <head>
   <meta charset='UTF-8'>
   <title>Thank You!</title>
@@ -16,7 +17,9 @@
 
   <table>
     <% if legislators.kind_of?(Array) %>
+    <tr>
       <th>Name</th><th>Website</th>
+    </tr>
         <% legislators.each do |legislator| %>
         <tr>
           <td><%= "#{legislator.name}" %></td>
