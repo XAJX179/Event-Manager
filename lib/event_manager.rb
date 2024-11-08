@@ -40,7 +40,7 @@ def get_legislators_names(zipcode)
 end
 
 def save_letter(id, form_letter)
-  Dir.mkdir 'output' unless Dir.exist? 'output'
+  FileUtils.mkdir_p 'output'
   file_name = "output/thanks_#{id}.html"
   File.open(file_name, 'w') do |file|
     file.puts form_letter
@@ -80,7 +80,7 @@ if File.exist? 'event_attendees.csv'
   end
 
   def find_peak(data)
-    data.select do |k, v|
+    data.select do |_k, v|
       v >= 2
     end
   end
